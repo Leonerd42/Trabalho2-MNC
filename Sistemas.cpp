@@ -17,6 +17,7 @@ int Menu(){
 	
 	int x; 
 	
+	system("cls"); 
 	printf("\nEscolha a opção: "); 
 	printf("\n\n1 - Cálculo de Determinante"); 
 	printf("\n10 - Fechar programa"); 

@@ -105,6 +105,38 @@ double Determinante (int ordem, double matriz[][max]){
 
 //  FIM DAS ROTINAS DO CALCULO DE DETERMINANTE
 
+/*************************************************************
+		     Cálculo dos Sistemas Triangulares
+**************************************************************/
+
+void SistemaTriangularSuperior(int ordem, double matriz[][max], double b[], double x[]){ //okay, funciona!!
+	
+	double somatorio;  
+	
+	for(int i=0; i<ordem; i++){
+		somatorio = 0; 
+		for (int j=0; j<i; j++){
+			somatorio += x[ordem-1-j] * matriz[ordem-1-i][ordem-1-j]; 
+		}
+		x[ordem-1-i] = (b[ordem-1-i] - somatorio) / matriz[ordem-1-i][ordem-1-i]; 
+	}
+}
+
+void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], double x[]){
+	
+	double somatorio; 
+	
+	for(int i=0; i<ordem; i++){
+		somatorio = 0; 
+		for(int j=0; j<i; j++){
+			somatorio += (x[j] * matriz[i][ordem-1-j]); 
+		}
+		x[i] = (b[i] - somatorio) / matriz[i][ordem-1-i];
+	}
+}
+
+
+
 int MenuMetodos(){
 	int op = 0;
 	do{
@@ -137,7 +169,7 @@ void MostraMatriz(double matriz[max][max], int ordem){
 	printf("\n\tMatriz:\n");
 	for(int i=0; i<ordem; i++){
 		for(int j=0; j<ordem; j++){
-			printf("\t%.2f", matriz[i][j]);
+			printf("\t%.2lf", matriz[i][j]);
 		}
 		printf("\n");
 	}
@@ -146,8 +178,34 @@ void MostraMatriz(double matriz[max][max], int ordem){
 int main(){
 	int opcao, ordem;
 	double det, matriz[max][max]; 	
-	//freopen("matriz.txt","r",stdin); 
-	do{
+	double b[max], solucao[max]; 
+	
+	freopen("matriz.txt","r",stdin); 	//Matriz inferior
+	//freopen("matriz2.txt","r",stdin); // Matriz superior
+	scanf("%d",&ordem); 
+	for(int i=0; i<ordem; i++)
+		for(int j=0; j<ordem; j++)
+			scanf("%lf",&matriz[i][j]); 
+			
+	for(int i=0; i<ordem; i++)
+		scanf("%lf",&b[i]); 
+	
+	MostraMatriz(matriz,ordem); 
+	
+	printf("\nTermos independentes: "); 
+	for(int i=0; i<ordem; i++)
+		printf("  %lf ",b[i]);
+		
+	SistemaTriangularInferior(ordem,matriz,b,solucao); 
+	//SistemaTriangularSuperior(ordem,matriz,b,solucao);
+	
+	printf("\nSolução: "); 
+	for(int i=0; i<ordem; i++)
+		printf("  %lf ",solucao[i]);	
+	
+	//Comentei o menu pra poder testar as rotinas individualmente 
+	//pra facilitar
+	/*do{
 		opcao = MenuMetodos();
 		switch(opcao){
 			case 1:		ColetaDados(&ordem, 1, matriz);
@@ -156,6 +214,8 @@ int main(){
 						printf("det(A) = %lf\n\t", det);
 						system("pause"); 
 						break;
+			case 2:    
+						break; 
 		}
-	}while(opcao != 12);
+	}while(opcao != 12);*/
 }

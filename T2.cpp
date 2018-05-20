@@ -78,8 +78,7 @@ double Determinante (int ordem, double matriz[][max]){
 	double maux [max][max]; 
 	int soma = 0; 
 	
-	if(ordem == 2) return (matriz[0][0] * matriz[1][1] - matriz[0][1]*matriz[1][0]);		
-	
+	if(ordem == 2) return (matriz[0][0] * matriz[1][1] - matriz[0][1]*matriz[1][0]);	
 	if(ordem == 1) return matriz[0][0];
 	
 	MelhorCaminho(matriz,ordem,&lin_col,&num);
@@ -125,7 +124,6 @@ void SistemaTriangularSuperior(int ordem, double matriz[][max], double b[], doub
 void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], double x[]){
 	
 	double somatorio; 
-	
 	for(int i=0; i<ordem; i++){
 		somatorio = 0; 
 		for(int j=0; j<i; j++){
@@ -134,8 +132,6 @@ void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], doub
 		x[i] = (b[i] - somatorio) / matriz[i][i];
 	}
 }
-
-
 
 int MenuMetodos(){
 	int op = 0;

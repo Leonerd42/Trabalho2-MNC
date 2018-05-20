@@ -129,9 +129,9 @@ void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], doub
 	for(int i=0; i<ordem; i++){
 		somatorio = 0; 
 		for(int j=0; j<i; j++){
-			somatorio += (x[j] * matriz[i][ordem-1-j]); 
+			somatorio += (x[j] * matriz[i][j]); 
 		}
-		x[i] = (b[i] - somatorio) / matriz[i][ordem-1-i];
+		x[i] = (b[i] - somatorio) / matriz[i][i];
 	}
 }
 

@@ -133,6 +133,17 @@ void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], doub
 	}
 }
 
+/*************************************************************
+			          Gauss Compacto 
+*************************************************************/
+
+void GaussCompacto (int ordem, double matriz[][max], double b[], double x[]){
+	
+		
+	
+	
+}
+
 int MenuMetodos(){
 	int op = 0;
 	do{

@@ -458,8 +458,8 @@ void MatrizInversa(int ordem, double matriz[][max], double inversa[][max]){
 				DecomposicaoLU(ordem,matriz,y[i],inversa[i]);					
 			break; 
 		case 2: 
-			//for(int i=0; i<ordem; i++)
-				//GaussCompacto(ordem,matriz,y[i],inversa[i]);
+			for(int i=0; i<ordem; i++)
+				GaussCompacto(ordem,matriz,y[i],inversa[i]);
 			break; 
 	}	
 	TransporMatriz(ordem,inversa); 

@@ -18,7 +18,6 @@ double Determinante (int ordem, double matriz[][max]);
 /*************************************************************
 		     Cálculo dos Determinantes
 **************************************************************/
-
 void MenorPrincipal (double matriz[max][max],double Menor[max][max], int linha, int coluna, int ordem){
 	int aux_l = 0, aux_c = 0; 
 	for (int i=0; i<ordem; i++){
@@ -35,7 +34,7 @@ void MenorPrincipal (double matriz[max][max],double Menor[max][max], int linha, 
 		aux_l++; 
 	}	
 }
-
+//-----------------------------------------------------------
 void MelhorCaminho (double matriz[max][max],int ordem, int *lin_col, int *n){
 	int cont_i, cont_j, melh_i, melh_j, lin[ordem], col[ordem]; 
 	cont_i = cont_j = melh_i = melh_j = (*lin_col) = 0;	 
@@ -81,11 +80,11 @@ void MelhorCaminho (double matriz[max][max],int ordem, int *lin_col, int *n){
 		(*n) = melh_j; 
 	}	
 }
-//---------------------------
+//-----------------------------------------------------------
 double Cofator (int ordem, int i, int j, double matriz[][max]){
 	return pow((-1),i+j) * Determinante(ordem-1,matriz);  
 }
-//---------------------------
+//-----------------------------------------------------------
 double Determinante (int ordem, double matriz[][max]){
 	int i, j, lin_col, num, soma=0;
 	double maux [max][max]; 
@@ -114,9 +113,6 @@ double Determinante (int ordem, double matriz[][max]){
 		}
 	return soma; 
 }
-
-//  FIM DAS ROTINAS DO CALCULO DE DETERMINANTE
-
 /*************************************************************
 		     Cálculo dos Sistemas Triangulares
 **************************************************************/
@@ -130,7 +126,7 @@ void SistemaTriangularSuperior(int ordem, double matriz[][max], double b[], doub
 		x[ordem-1-i] = (b[ordem-1-i] - somatorio) / matriz[ordem-1-i][ordem-1-i]; 
 	}
 }
-//-----------------------------
+//----------------------------------------------------------
 void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], double x[]){
 	double somatorio; 
 	for(int i=0; i<ordem; i++){
@@ -141,15 +137,11 @@ void SistemaTriangularInferior(int ordem, double matriz[][max], double b[], doub
 		x[i] = (b[i] - somatorio) / matriz[i][i];
 	}
 }
-
-//FIM DAS ROTINAS DE SISTEMAS TRIANGUALRES
-
 /*************************************************************
 		     Cálculo dos Sistemas Genéricos
-**************************************************************/
-/************************************
-		Decomposicao LU
-*************************************/
+		     ------------------------------
+					Decomposicao LU
+*************************************************************/
 void Uij(int linha, int coluna, double matriz[][max], double U[][max], double L[][max]){
 	double somatorio=0;
 	int k;
@@ -159,7 +151,7 @@ void Uij(int linha, int coluna, double matriz[][max], double U[][max], double L[
 	U[linha][coluna] = matriz[linha][coluna] - somatorio;
 	return;
 }
-//-----------------
+//-----------------------------------------------------------
 void Lij(int linha, int coluna, double matriz[][max], double U[][max], double L[][max]){
 	double somatorio=0;
 	int k;
@@ -169,7 +161,7 @@ void Lij(int linha, int coluna, double matriz[][max], double U[][max], double L[
 	L[linha][coluna]=(matriz[linha][coluna] - somatorio)/U[coluna][coluna];
 	return;
 }
-//--------------------
+//-----------------------------------------------------------
 void ZeraMatriz(double matriz[max][max], int ordem){
 	for(int i=0; i<ordem; i++){
 		for(int j=0; j<ordem; j++){
@@ -177,6 +169,7 @@ void ZeraMatriz(double matriz[max][max], int ordem){
 		}
 	}
 }
+//-----------------------------------------------------------
 void DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
 	int i,j;
 	double L[max][max], U[max][max],y[max]; //L = inferior ; U = superior
@@ -208,9 +201,9 @@ void DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
 	SistemaTriangularInferior(ordem,L,b,y);
 	SistemaTriangularSuperior(ordem,U,y,x);
 }
-/************************************
-		cholesky
-*************************************/
+/*************************************************************
+						Cholesky
+*************************************************************/
 int simetrica(double matriz[][max], int ordem){
 	for(int i=0; i<ordem; i++){
 		for(int j=i+1; j<ordem; j++){
@@ -221,7 +214,7 @@ int simetrica(double matriz[][max], int ordem){
 	}
 	return 1;
 }
-//--------------------------------
+//-----------------------------------------------------------
 double L_Cholesky(double Aij, int i, int j, double L[][max]){
 	double somatorio=0;
 	
@@ -238,7 +231,7 @@ double L_Cholesky(double Aij, int i, int j, double L[][max]){
 		return ((Aij-somatorio)/L[j][j]);
 	}
 }
-//----------------------------
+//-----------------------------------------------------------
 void Transpor_L(double L[][max], int ordem, double L_t[][max]){
 	
 	for(int i=0; i<ordem; i++){
@@ -247,7 +240,7 @@ void Transpor_L(double L[][max], int ordem, double L_t[][max]){
 		}
 	}
 }
-//------------------------------
+//-----------------------------------------------------------
 void Cholesky(int ordem, double matriz[][max], double b[], double x[]){
 	
 	double L[max][max], L_t[max][max], y[max];
@@ -282,12 +275,198 @@ void Cholesky(int ordem, double matriz[][max], double b[], double x[]){
 	SistemaTriangularInferior(ordem, L, b, y);
 	SistemaTriangularSuperior(ordem, L_t, y, x);
 }
+//-----------------------------------------------------------
+/************************************************************
+					Gauss Compacto
+*************************************************************/
+void TrocaLinhas(double matriz[max][max], int linha1, int linha2, int ordem){
+	double aux;
+	for(int j=0; j<ordem; j++){
+		aux=matriz[linha1][j];
+		matriz[linha1][j]=matriz[linha2][j];
+		matriz[linha2][j]=aux;
+	}
+}
+//-----------------------------------------------------------
+void Uij_compacto(int linha, int coluna, double mExt[][max], double mLU[max][max]){
+	double somatorio=0;
+	int k;
+	for(k=0;k<=linha-1;k++){
+		somatorio += (mLU[linha][k]*mLU[k][coluna]);
+	}
+	mLU[linha][coluna] = mExt[linha][coluna] - somatorio;
+}
+//-----------------------------------------------------------
+void Lij_compacto(int linha, int coluna, double mExt[][max], double mLU[max][max]){
+	double somatorio=0;
+	int k;
+	for(k=0;k<=coluna-1;k++){
+		somatorio += (mLU[linha][k]*mLU[k][coluna]);
+	}
+	mLU[linha][coluna]=(mExt[linha][coluna] - somatorio)/mLU[coluna][coluna];
+}
+//-----------------------------------------------------------
+void GaussCompacto(int ordem, double matriz[][max], double b[], double x[]){
+	double mExt[max][max], mLU[max][max];
+	
+	//CONVERGENCIA:
+	for(int i=0; i<ordem; i++){
+		if(Determinante(i+1, matriz)==0){
+			printf("\n O METODO NAO CONVERGE!");
+			return;
+		}
+	}
+	//JUNTAR MATRIZES:
+	for(int i=0; i<ordem; i++){
+		for(int j=0; j<ordem+1; j++){
+			if(j<ordem){
+				mExt[i][j]=matriz[i][j];
+			}
+			else{
+				mExt[i][j]=b[i];
+			}
+		}
+	}
+	//METODO:
+	for(int i=0; i<ordem; i++){
+		for(int j=0; j<ordem+1; j++){
+			if(j>=i){
+				Uij_compacto(i, j, mExt, mLU);
+			}
+			else{
+				Lij_compacto(i, j, mExt, mLU);
+			}
+		}
+	}
+	for(int i=0; i<ordem; i++){
+		b[i]=mLU[i][ordem];
+	}
+	SistemaTriangularSuperior(ordem, mLU, b, x);
+}
 
+/************************************************************
+					    Gauss Jordan 
+************************************************************/
+void AmpliaMatriz(int ordem, double matriz[][max], double vetor[]){
+	for(int i=0; i<ordem; i++)
+		matriz[i][ordem] = vetor[i];
+}
+//-----------------------------------------------------------
+void GaussJordan (int ordem, double matriz[][max], double b[], double x[]){
+	
+	int pivo;
+	float m; 
+	double maux[ordem][ordem+1]; 
+	int coluna = 0; 
+	
+	if(Determinante(ordem,matriz) == 0){
+		printf("\nMétodo não converge"); 
+		system("pause"); 
+		return; 
+	}
+	
+	AmpliaMatriz(ordem,matriz,b); 
+	printf("\n\n\tMatriz Ampliada\n"); 
+	for(int i=0; i<ordem; i++){
+		printf("\n\t"); 
+		for(int j=0; j<=ordem; j++){
+			printf(" %lf ",matriz[i][j]); 
+		} 
+	}
+	
+	for(coluna = 0; coluna < ordem; coluna++){
+		
+		//Escolha do pivo
+		for(int i = coluna; i<ordem; i++){
+			if(matriz[i][coluna] != 0){
+				pivo = i; 
+				break; 
+			}
+		}
+		
+		if(pivo != coluna){
+			TrocaLinhas(matriz,pivo,coluna,ordem+1); 
+		}
+		
+		for(int i=0; i<ordem; i++){
+			if(i != coluna){				
+				m = matriz[i][coluna] / matriz[coluna][coluna]; 	
+				for(int j=0; j<ordem+1; j++){
+					matriz[i][j] = matriz[i][j] - (m * matriz[coluna][j]); 
+					if(j == ordem)
+						b[i] = matriz[i][j]; //Atualiza o vetor b fora da matriz
+				}
+			}
+		}	
+	} 	
+	
+	SistemaTriangularSuperior(ordem,matriz,b,x);
+	
+	printf("\n\n\tMatriz Zerada\n"); 
+	for(int i=0; i<ordem; i++){
+		printf("\n\t"); 
+		for(int j=0; j<=ordem; j++){
+			printf(" %lf ",matriz[i][j]); 
+		}
+		
+	} 
+}
+
+/*************************************************************
+					     Matriz Inversa 
+*************************************************************/
+void GerarIdentidade (int ordem, double I[][max]){
+	
+	ZeraMatriz(I,ordem); 
+	for(int i=0; i<ordem; i++)
+		I[i][i] = 1; 	
+}
+//-----------------------------------------------------------
+void CopiaMatriz(int ordem, double m1[][max], double m2[][max]){
+	for(int i=0; i<ordem; i++)
+		for(int j=0; j<ordem; j++)
+			m2[i][j] = m1[i][j]; }
+//-----------------------------------------------------------
+void TransporMatriz(int ordem, double matriz[][max]){
+	
+	double maux[max][max]; 
+	CopiaMatriz(ordem,matriz,maux); 
+	for(int i=0; i<ordem; i++){
+		for(int j=0; j<ordem; j++){
+			matriz[i][j] = maux[j][i]; 
+		}
+	}
+}
+//-----------------------------------------------------------
+void MatrizInversa(int ordem, double matriz[][max], double inversa[][max]){
+	
+	int op;
+	double y[max][max]; 
+	system("cls"); 
+	printf("\n\tQual o método a ser utilizado?"); 
+	printf("\n\t 1 - Decomposiçao LU"); 
+	printf("\n\t 2 - Gauss Compacto"); 
+	printf("\n\n\tOpção: "); 
+	do{
+		scanf("%d",&op); 
+	}while(op != 1 && op != 2);
+	
+	GerarIdentidade(ordem,y); 	
+	switch(op){
+		case 1:				
+			for(int i=0; i<ordem; i++)
+				DecomposicaoLU(ordem,matriz,y[i],inversa[i]);					
+			break; 
+		case 2: 
+			//for(int i=0; i<ordem; i++)
+				//GaussCompacto(ordem,matriz,y[i],inversa[i]);
+			break; 
+	}	
+	TransporMatriz(ordem,inversa); 
+}
 /*************************************************************
 		    				Menu
 **************************************************************/
-
-//---------------------
 int MenuMetodos(){
 	int op = 0;
 	do{
@@ -303,12 +482,12 @@ int MenuMetodos(){
 	}while(op<1 || op>12);
 	return op;
 }
-//------------------------------------------
+//-----------------------------------------------------------
 void ColetaDados(int *ordem, double matriz[][max], double b[max],  int opcao){
 	
 	// coleta dados para calculo do determinante
 	if(opcao==1){ 
-		system("cls");
+		//system("cls");
 		printf("\n\tDigite a ordem da matriz:");
 		scanf("%d", &(*ordem));
 		printf("\nDigite a Matriz: \n"); 
@@ -317,8 +496,7 @@ void ColetaDados(int *ordem, double matriz[][max], double b[max],  int opcao){
 				scanf("%lf",&matriz[i][j]);
 			}
 		}
-	}
-	
+	}	
 	// coleta dados para Sistemas lineares
 	if(opcao==2){
 		system("cls");
@@ -336,7 +514,7 @@ void ColetaDados(int *ordem, double matriz[][max], double b[max],  int opcao){
 		}
 	}
 }
-
+//-----------------------------------------------------------
 void MostraMatriz(double matriz[max][max], int ordem){
 	printf("\n\tMatriz:\n");
 	for(int i=0; i<ordem; i++){
@@ -346,44 +524,35 @@ void MostraMatriz(double matriz[max][max], int ordem){
 		printf("\n");
 	}
 }
-
+//-----------------------------------------------------------
 void MostraSolucao(double x[max], int ordem){
 	printf("\n\tSolucao:\n");
 	for(int i=0; i<ordem; i++){
 		printf("\t%lf\n", x[i]);
 	}
 }
-//------------------------------------------
+//-----------------------------------------------------------
 int main(){
 	int opcao, ordem;
-	double det, matriz[max][max], b[max], solucao[max];
+	double det, matriz[max][max], inv_matriz[max][max], b[max], solucao[max]; 
 	
-	//freopen("matriz.txt","r",stdin); 	//Matriz inferior
+	/*freopen("matriz.txt","r",stdin); 	//Matriz para calcular gauss jordan
 	//freopen("matriz2.txt","r",stdin); // Matriz superior
 	//freopen("cholesky.txt", "r", stdin); // cholesky
-	/*scanf("%d",&ordem); 
+	
+	scanf("%d",&ordem); 
 	for(int i=0; i<ordem; i++)
 		for(int j=0; j<ordem; j++)
 			scanf("%lf",&matriz[i][j]); 
-			
 	for(int i=0; i<ordem; i++)
 		scanf("%lf",&b[i]); 
 	
-	MostraMatriz(matriz,ordem); 
-	
-	printf("\nTermos independentes: "); 
-	for(int i=0; i<ordem; i++)
-		printf("  %lf ",b[i]);
-		
-	SistemaTriangularInferior(ordem,matriz,b,solucao); 
-	//SistemaTriangularSuperior(ordem,matriz,b,solucao);
-	
-	printf("\nSolução: "); 
-	for(int i=0; i<ordem; i++)
-		printf("  %lf ",solucao[i]);*/	
-	
-	//Comentei o menu pra poder testar as rotinas individualmente 
-	//pra facilitar
+	MostraMatriz(matriz,ordem); 	
+	GaussJordan(ordem,matriz,b,solucao); 
+	//MostraMatriz()
+	MostraSolucao(solucao,ordem); 
+	system("pause"); 
+	/**/	
 	do{
 		opcao = MenuMetodos();
 		switch(opcao){
@@ -416,7 +585,6 @@ int main(){
 				system("pause");
 				break; 
 			case 5: 
-				//freopen("cholesky.txt", "r", stdin);
 				ColetaDados(&ordem, matriz, b, 2);
 				system("pause");
 				MostraMatriz(matriz, ordem);
@@ -424,6 +592,31 @@ int main(){
 				MostraSolucao(solucao, ordem);
 				system("pause");
 				break; 
+			case 6:
+				ColetaDados(&ordem, matriz, b, 2);
+				MostraMatriz(matriz, ordem);
+				GaussCompacto(ordem, matriz, b, solucao); 
+				MostraSolucao(solucao, ordem);
+				system("pause");
+				break; 
+			case 7: 
+				ColetaDados(&ordem,matriz,b,2); 
+				printf("\nDigite o vetor dos termos independentes: ");  
+				GaussJordan(ordem,matriz,b,solucao); 
+				MostraSolucao(solucao,ordem); 
+				system("pause");  
+				break; 
+			case 8: 		//GPP sem troca de linhas 
+				break; 
+			case 9:			//Jacobi
+				break; 
+			case 10: 		//Gauss Seidel 
+				break; 
+			case 11: //Matriz inversa				
+				ColetaDados(&ordem,matriz,b,1);
+				MatrizInversa(ordem,matriz,inv_matriz);
+				MostraMatriz(inv_matriz,ordem); 
+				system("pause");  
 		}
 	}while(opcao != 12);
 }

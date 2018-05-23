@@ -5,15 +5,18 @@ Bruna Lika Tamake, RA: 171024427
 Leonardo Silva de Oliveira, RA: 171025903
 
 *****************************************************/
+#include<math.h>
 #include<stdio.h>
 #include<conio.h>
-#include<stdlib.h>
 #include<ctype.h>
-#include<math.h>
+#include<stdlib.h>
+#include <locale.h>
+
 #define max 10
 
-void MostraMatriz(double matriz[max][max], int ordem);
+void MostraMatriz(double matriz[max][max], int linha, int coluna);
 double Determinante (int ordem, double matriz[][max]);
+void CopiaMatriz(int linha,int coluna, double m1[][max], double m2[][max]);
 
 /*************************************************************
 		     Cálculo dos Determinantes
@@ -170,7 +173,7 @@ void ZeraMatriz(double matriz[max][max], int ordem){
 	}
 }
 //-----------------------------------------------------------
-void DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
+int DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
 	int i,j;
 	double L[max][max], U[max][max],y[max]; //L = inferior ; U = superior
 	ZeraMatriz(L, ordem);
@@ -178,7 +181,7 @@ void DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
 	for(i=0;i<ordem;i++){ //testar convergencia det(Ak)!= 0 ,  0 <= k < ordem
 		if((Determinante(i+1,matriz)) == 0){
 			printf("\nNao converge!");
-			return;
+			return 0;
 		}
 	}
 	for(i=0;i<ordem;i++){ // variacao de linha
@@ -195,11 +198,12 @@ void DecomposicaoLU(int ordem, double matriz[][max], double b[], double x[]){
 		}
 	}
 	printf("\nMatriz U:");
-	MostraMatriz(U,ordem);
+	MostraMatriz(U,ordem,ordem);
 	printf("\nMatriz L:");
-	MostraMatriz(L,ordem);
+	MostraMatriz(L,ordem,ordem);
 	SistemaTriangularInferior(ordem,L,b,y);
 	SistemaTriangularSuperior(ordem,U,y,x);
+	return 1; 
 }
 /*************************************************************
 						Cholesky
@@ -241,19 +245,22 @@ void Transpor_L(double L[][max], int ordem, double L_t[][max]){
 	}
 }
 //-----------------------------------------------------------
-void Cholesky(int ordem, double matriz[][max], double b[], double x[]){
+int Cholesky(int ordem, double matriz[][max], double b[], double x[]){
 	
 	double L[max][max], L_t[max][max], y[max];
 	ZeraMatriz(L, ordem);
 	ZeraMatriz(L_t, ordem);
 	//CONVERGENCIA:
 	if(simetrica(matriz, ordem)==0){
-		printf("O METODO NAO CONVERGE!");
+		printf("\n\tO METODO NAO CONVERGE!");
+		printf("\n\tMATRIZ NÃO É SIMETRICA"); 
+		return 0; 
 	}
 	for(int i=0; i<ordem; i++){
 		if(Determinante(i+1, matriz)<=0){
-			printf("\n O METODO NAO CONVERGE!");
-			return;
+			printf("\n\tO METODO NAO CONVERGE!");
+			printf("\n\tDETERMINANTE DE Ak = 0");
+			return 0;
 		}
 	}
 	
@@ -267,13 +274,15 @@ void Cholesky(int ordem, double matriz[][max], double b[], double x[]){
 		//printf("\n");
 	}
 	printf("\n Matriz L:\n");
-	MostraMatriz(L, ordem);
+	MostraMatriz(L, ordem,ordem);
 	Transpor_L(L, ordem, L_t);
 	printf("\n Matriz L_t:\n");
-	MostraMatriz(L_t, ordem);
+	MostraMatriz(L_t, ordem,ordem);
+	printf("\n\t"); 
 	system("pause");
 	SistemaTriangularInferior(ordem, L, b, y);
 	SistemaTriangularSuperior(ordem, L_t, y, x);
+	return 1; 
 }
 //-----------------------------------------------------------
 /************************************************************
@@ -306,14 +315,14 @@ void Lij_compacto(int linha, int coluna, double mExt[][max], double mLU[max][max
 	mLU[linha][coluna]=(mExt[linha][coluna] - somatorio)/mLU[coluna][coluna];
 }
 //-----------------------------------------------------------
-void GaussCompacto(int ordem, double matriz[][max], double b[], double x[]){
+int GaussCompacto(int ordem, double matriz[][max], double b[], double x[]){
 	double mExt[max][max], mLU[max][max];
 	
 	//CONVERGENCIA:
 	for(int i=0; i<ordem; i++){
 		if(Determinante(i+1, matriz)==0){
 			printf("\n O METODO NAO CONVERGE!");
-			return;
+			return 0;
 		}
 	}
 	//JUNTAR MATRIZES:
@@ -342,6 +351,7 @@ void GaussCompacto(int ordem, double matriz[][max], double b[], double x[]){
 		b[i]=mLU[i][ordem];
 	}
 	SistemaTriangularSuperior(ordem, mLU, b, x);
+	return 1; 
 }
 
 /************************************************************
@@ -352,7 +362,7 @@ void AmpliaMatriz(int ordem, double matriz[][max], double vetor[]){
 		matriz[i][ordem] = vetor[i];
 }
 //-----------------------------------------------------------
-void GaussJordan (int ordem, double matriz[][max], double b[], double x[]){
+int GaussJordan (int ordem, double matriz[][max], double b[], double x[]){
 	
 	int pivo;
 	float m; 
@@ -362,7 +372,7 @@ void GaussJordan (int ordem, double matriz[][max], double b[], double x[]){
 	if(Determinante(ordem,matriz) == 0){
 		printf("\nMétodo não converge"); 
 		system("pause"); 
-		return; 
+		return 0; 
 	}
 	
 	AmpliaMatriz(ordem,matriz,b); 
@@ -402,16 +412,109 @@ void GaussJordan (int ordem, double matriz[][max], double b[], double x[]){
 	
 	SistemaTriangularSuperior(ordem,matriz,b,x);
 	
-	printf("\n\n\tMatriz Zerada\n"); 
+	printf("\n\n\tMatriz Escalonada\n"); 
+	MostraMatriz(matriz,ordem,ordem+1); 
+	return 1;
+}
+/***********************************************************
+					GPP Sem troca de linhas
+***********************************************************/
+double Modulo (double numero){	
+	return (numero >= 0) ? numero : numero*(-1); 	
+}
+//---------------------------------------------------------
+int GaussPivoParcialSemTrocas(int ordem, double matriz[][max], double b[], double x[]){
+	
+	int coluna; 
+	int posicao[ordem]; 
+	int aux, aux2;  
+	double m; 
+	double maux[max][max]; 
+	
+	if(Determinante(ordem,matriz) == 0){
+		printf("\nMétodo não converge\n"); 
+		system("pause"); 
+		return 0; 
+	}
+	
+	AmpliaMatriz(ordem,matriz,b); 
+	printf("\n\n\tMatriz Ampliada\n"); 
 	for(int i=0; i<ordem; i++){
 		printf("\n\t"); 
-		for(int j=0; j<=ordem; j++){
-			printf(" %lf ",matriz[i][j]); 
-		}
+		for(int j=0; j<=ordem; j++)
+			printf(" %.2lf ",matriz[i][j]); 
+	}
+	
+	for(int i=0; i<ordem; i++)
+		posicao[i] = i; 
+	
+	for(coluna=0; coluna<ordem; coluna++){
 		
-	} 
+		//Escolha do pivo e troca das linhas no vetor posição 
+		aux = coluna; 
+		for(int i=coluna; i<ordem; i++)		
+			if(Modulo(matriz[posicao[i]][coluna]) > Modulo(matriz[aux][coluna]))
+				aux = i; 
+		//Troca das posições do vetor posição 
+		aux2 = posicao[coluna]; 
+		posicao[coluna] = posicao[aux]; 
+		posicao[aux] = aux2; 
+		
+		//Zerando a coluna atual 
+		for(int i = coluna; i<ordem; i++){
+	    	if(posicao[i] != posicao[coluna]){
+		    	m = matriz[posicao[i]][coluna] / matriz[posicao[coluna]][coluna];
+		    	for(int j = 0; j<ordem+1; j++){
+		    		matriz[posicao[i]][j] -= m * matriz[posicao[coluna]][j];
+				}
+			}else continue;
+		}
+	}
+	
+	printf("\n\n\tMatriz escalonada\n");
+	MostraMatriz(matriz,ordem,ordem+1); 
+	
+	//Copia matriz 
+	CopiaMatriz(ordem,ordem+1,matriz,maux); 
+	
+	//Troca as linhas da matriz 
+	for(int i = 0; i < ordem; i++){
+		for(int j=0; j<ordem+1; j++){
+			matriz[i][j] = maux[posicao[i]][j];
+		}
+	}	
+	
+	//Atualiza o vetor b na ordem correta
+	for(int i=0; i<ordem; i++){
+		b[i] = matriz[i][ordem]; 
+	}
+	SistemaTriangularSuperior(ordem,matriz,b,x);
+	return 1;
 }
-
+/************************************************************
+				  		Métodos Iterativo 
+				  	-----------------------
+				  			Jacobi
+************************************************************/
+int Jacobi(int ordem, double matriz[][max], double b[], double x0[], float e, int max_ite, double x[], int *iteracoes){
+	
+	// Aqui vai a rotina do jacobi 
+	//Caso não haja convergência
+		return 0; 
+	//Caso haja convergência
+		return 1; 	
+}
+/************************************************************
+					  	Gauss-Seidel
+************************************************************/
+int GaussSeidel(int ordem, double matriz[][max], double b[], double x0[], float e, int max_ite, double x[], int *iteracoes){
+	
+	//Aqui vai a rotina do Gauss-Seidel 
+	//Caso não haja convergência
+		return 0; 
+	//Caso haja convergência
+		return 1; 
+}
 /*************************************************************
 					     Matriz Inversa 
 *************************************************************/
@@ -422,15 +525,15 @@ void GerarIdentidade (int ordem, double I[][max]){
 		I[i][i] = 1; 	
 }
 //-----------------------------------------------------------
-void CopiaMatriz(int ordem, double m1[][max], double m2[][max]){
-	for(int i=0; i<ordem; i++)
-		for(int j=0; j<ordem; j++)
+void CopiaMatriz(int linha,int coluna, double m1[][max], double m2[][max]){
+	for(int i=0; i<linha; i++)
+		for(int j=0; j<coluna; j++)
 			m2[i][j] = m1[i][j]; }
 //-----------------------------------------------------------
 void TransporMatriz(int ordem, double matriz[][max]){
 	
 	double maux[max][max]; 
-	CopiaMatriz(ordem,matriz,maux); 
+	CopiaMatriz(ordem,ordem,matriz,maux); 
 	for(int i=0; i<ordem; i++){
 		for(int j=0; j<ordem; j++){
 			matriz[i][j] = maux[j][i]; 
@@ -472,53 +575,80 @@ int MenuMetodos(){
 	do{
 		system("cls");
 		fflush(stdin);
-		printf("\n\tMENU\t\n");
-		printf("\n\t1-Determinante \n\t2-Sistema Triangular Inferior \n\t3-Sistema Triangular Superior \n\t4-Decomposicao LU \n\t5-Cholesky \n\t6-Gauss Compacto \n\t7-Gauss Jordan \n\t8-GPP SEM troca de linhas \n\t9-Jacobi \n\t10-Gauss Seidel \n\t11-Matriz Inversa\n\t12-Fechar programa\n");
-		printf("\n\tDigite a opcao:");
+		printf("\n\tMENU - Sempre que for digitar um numero racional, use a virgula\n");
+		//printf("\n\t1-Determinante \n\t2-Sistema Triangular Inferior \n\t3-Sistema Triangular Superior \n\t4-Decomposicao LU \n\t5-Cholesky \n\t6-Gauss Compacto \n\t7-Gauss Jordan \n\t8-GPP SEM troca de linhas \n\t9-Jacobi \n\t10-Gauss Seidel \n\t11-Matriz Inversa\n\t12-Fechar programa\n");
+		printf("\n\t 1 - Decomposição LU"); 
+		printf("\n\t 2 - Cholesky"); 
+		printf("\n\t 3 - Gauss Compacto "); 
+		printf("\n\t 4 - Gauss Jordan"); 
+		printf("\n\t 5 - GPP Sem troca de Linhas"); 
+		printf("\n\t 6 - Jacobi"); 
+		printf("\n\t 7 - Gauss Seidel "); 
+		printf("\n\t 8 - Matriz Inversa"); 
+		printf("\n\t 9 - Fechar Programa"); 
+		printf("\n\n\tDigite a opcao:");
 		scanf("%d",&op);
-		if(op<1 || op>12){
+		if(op<1 || op>9){
 			printf("\n\nOpcao Invalida!\n");
 		}
-	}while(op<1 || op>12);
+	}while(op<1 || op>9);
 	return op;
 }
 //-----------------------------------------------------------
 void ColetaDados(int *ordem, double matriz[][max], double b[max],  int opcao){
 	
 	// coleta dados para calculo do determinante
-	if(opcao==1){ 
-		//system("cls");
-		printf("\n\tDigite a ordem da matriz:");
-		scanf("%d", &(*ordem));
-		printf("\nDigite a Matriz: \n"); 
-		for(int i=0; i<(*ordem); i++){
-			for(int j=0; j<(*ordem); j++){
-				scanf("%lf",&matriz[i][j]);
-			}
-		}
-	}	
-	// coleta dados para Sistemas lineares
-	if(opcao==2){
-		system("cls");
-		printf("\n\tDigite a ordem da matriz:");
-		scanf("%d", &(*ordem));
-		printf("\n\tDigite a Matriz: \n"); 
-		for(int i=0; i<(*ordem); i++){
-			for(int j=0; j<(*ordem); j++){
-				scanf("%lf",&matriz[i][j]);
-			}
-		}
-		printf("\n\tDigite o vetor de termos independentes:\n");
-		for(int i=0; i<(*ordem); i++){
-			scanf("%lf", &b[i]);
-		}
+	switch(opcao){
+		case 1:
+			//system("cls");
+			printf("\n\tDigite a ordem da matriz: ");
+			scanf("%d", &(*ordem));
+			printf("\nDigite a Matriz: \n"); 
+			for(int i=0; i<(*ordem); i++)
+				for(int j=0; j<(*ordem); j++)
+					scanf("%lf",&matriz[i][j]);				
+			break; 
+		case 2: 
+			//system("cls");
+			printf("\n\tDigite a ordem da matriz: ");
+			scanf("%d", &(*ordem));
+			printf("\n\tDigite a Matriz: \n"); 
+			for(int i=0; i<(*ordem); i++)
+				for(int j=0; j<(*ordem); j++)
+					scanf("%lf",&matriz[i][j]);				
+			printf("\n\tDigite o vetor de termos independentes:\n");
+			for(int i=0; i<(*ordem); i++)
+				scanf("%lf", &b[i]);
+			break; 
 	}
 }
 //-----------------------------------------------------------
-void MostraMatriz(double matriz[max][max], int ordem){
-	printf("\n\tMatriz:\n");
-	for(int i=0; i<ordem; i++){
-		for(int j=0; j<ordem; j++){
+void ColetaDadosIterativos(int *ordem, double matriz[][max], double b[], double x0[], float *e, int *max_ite){
+	
+	//system("cls"); 
+	printf("\n\tDigite a ordem da matriz: "); 
+	scanf("%d",&(*ordem)); 
+	printf("\n\tDigite a matriz: \n"); 
+	for(int i=0; i<(*ordem); i++)
+		for(int j=0; j<(*ordem); j++)
+			scanf("%lf",&matriz[i][j]); 
+	printf("\n\tDigite o vetor dos termos independentes:\n"); 
+	for(int i=0; i<(*ordem); i++)
+		scanf("%lf",&b[i]); 
+	printf("\n\tDigite o vetor da aproximação inicial:\n"); 
+	for(int i=0; i<(*ordem); i++)
+		scanf("%lf",&x0[i]); 
+	printf("\n\tDigite a precisão desejada: "); 
+	scanf("%f",&(*e)); 
+	printf("\n\tDigite o número maximo de iterações: ");
+	scanf("%d",&(*max_ite)); 
+	
+}
+//-----------------------------------------------------------
+void MostraMatriz(double matriz[max][max], int linha, int coluna){
+	printf("\n");
+	for(int i=0; i<linha; i++){
+		for(int j=0; j<coluna; j++){
 			printf("\t%.2lf", matriz[i][j]);
 		}
 		printf("\n");
@@ -533,8 +663,12 @@ void MostraSolucao(double x[max], int ordem){
 }
 //-----------------------------------------------------------
 int main(){
-	int opcao, ordem;
-	double det, matriz[max][max], inv_matriz[max][max], b[max], solucao[max]; 
+	setlocale(LC_ALL,"Portuguese");
+	int opcao, ordem, max_ite, iteracoes; 
+	int convergencia; 
+	float precisao; 
+	double det, matriz[max][max], inv_matriz[max][max];	//Matrizes
+	double x0[max], b[max], solucao[max]; //Vetores
 	
 	/*freopen("matriz.txt","r",stdin); 	//Matriz para calcular gauss jordan
 	//freopen("matriz2.txt","r",stdin); // Matriz superior
@@ -547,8 +681,8 @@ int main(){
 	for(int i=0; i<ordem; i++)
 		scanf("%lf",&b[i]); 
 	
-	MostraMatriz(matriz,ordem); 	
-	GaussJordan(ordem,matriz,b,solucao); 
+	MostraMatriz(matriz,ordem,ordem); 	
+	GaussPivoParcialSemTrocas(ordem,matriz,b,solucao); 
 	//MostraMatriz()
 	MostraSolucao(solucao,ordem); 
 	system("pause"); 
@@ -556,67 +690,112 @@ int main(){
 	do{
 		opcao = MenuMetodos();
 		switch(opcao){
-			case 1:		
+			/*case 1:		
 				ColetaDados(&ordem, matriz, b, 1);
-				MostraMatriz(matriz,ordem);
+				MostraMatriz(matriz,ordem,ordem);
 				det=Determinante(ordem, matriz); 
 				printf("det(A) = %lf\n\t", det);
 				system("pause"); 
 				break;
 			case 2: 
 				ColetaDados(&ordem, matriz, b, 2);
-				MostraMatriz(matriz, ordem);
+				MostraMatriz(matriz, ordem,ordem);
 				SistemaTriangularInferior(ordem, matriz, b, solucao); 
 				MostraSolucao(solucao, ordem);
 				system("pause");
 				break; 
 			case 3: 
 				ColetaDados(&ordem, matriz, b, 2);
-				MostraMatriz(matriz, ordem);
+				MostraMatriz(matriz, ordem,ordem);
 				SistemaTriangularSuperior(ordem, matriz, b, solucao); 
 				MostraSolucao(solucao, ordem);
 				system("pause");
-				break; 
-			case 4: 
+				break; */
+			case 1: //Decomposição LU
+				system("cls"); 
+				printf("\n\n\tMétodo da Decomposição LU\n\n"); 
 				ColetaDados(&ordem, matriz, b, 2);
-				MostraMatriz(matriz, ordem);
-				DecomposicaoLU(ordem, matriz, b, solucao); 
-				MostraSolucao(solucao, ordem);
+				MostraMatriz(matriz, ordem,ordem);
+				convergencia = DecomposicaoLU(ordem, matriz, b, solucao); 
+				if(convergencia)
+					MostraSolucao(solucao, ordem);
+				printf("\n\t");
 				system("pause");
 				break; 
-			case 5: 
+			case 2: //Cholesky
+				system("cls"); 
+				printf("\n\n\tMétodo de Cholesky\n\n"); 
 				ColetaDados(&ordem, matriz, b, 2);
-				system("pause");
-				MostraMatriz(matriz, ordem);
-				Cholesky(ordem, matriz, b, solucao); 
-				MostraSolucao(solucao, ordem);
+				MostraMatriz(matriz, ordem,ordem);
+				convergencia = Cholesky(ordem, matriz, b, solucao); 
+				if(convergencia)
+					MostraSolucao(solucao, ordem);
+				printf("\n\t");
 				system("pause");
 				break; 
-			case 6:
+			case 3: //Gauss compacto
+				system("cls"); 
+				printf("\n\n\tMétodo Gauss Compacto\n\n");
 				ColetaDados(&ordem, matriz, b, 2);
-				MostraMatriz(matriz, ordem);
-				GaussCompacto(ordem, matriz, b, solucao); 
-				MostraSolucao(solucao, ordem);
+				MostraMatriz(matriz, ordem,ordem);
+				convergencia = GaussCompacto(ordem, matriz, b, solucao); 
+				if(convergencia)
+					MostraSolucao(solucao, ordem);
+				printf("\n\t");
 				system("pause");
 				break; 
-			case 7: 
-				ColetaDados(&ordem,matriz,b,2); 
-				printf("\nDigite o vetor dos termos independentes: ");  
-				GaussJordan(ordem,matriz,b,solucao); 
-				MostraSolucao(solucao,ordem); 
+			case 4: //Gauss Jordan
+				system("cls"); 
+				printf("\n\n\tMétodo Gauss Jordan \n\n");
+				ColetaDados(&ordem,matriz,b,2);  
+				convergencia = GaussJordan(ordem,matriz,b,solucao); 
+				if(convergencia)
+					MostraSolucao(solucao,ordem); 
+				printf("\n\t");
 				system("pause");  
 				break; 
-			case 8: 		//GPP sem troca de linhas 
+			case 5: 		//GPP Sem troca de linhas 
+				system("cls"); 
+				printf("\n\n\tMétodo de Gauss Pivo Parcial Sem Troca de Linhas \n\n");
+				ColetaDados(&ordem,matriz,b,2); 
+				convergencia = GaussPivoParcialSemTrocas(ordem,matriz,b,solucao); 
+				if(convergencia)
+					MostraSolucao(solucao,ordem); 
+				printf("\n\t");
+				system("pause"); 
 				break; 
-			case 9:			//Jacobi
+			case 6:			//Jacobi
+				system("cls"); 
+				printf("\n\n\tMétodo Iterativo - Jacobi\n\n");
+				ColetaDadosIterativos(&ordem,matriz,b,x0,&precisao,&max_ite); 
+				convergencia = Jacobi(ordem,matriz,b,x0,precisao,max_ite,solucao,&iteracoes); 
+				if(convergencia){
+					MostraSolucao(solucao,ordem); 
+					printf("\nNúmero de iterações: %d\n",iteracoes); 
+				}
+				printf("\n\t");
+				system("pause"); 
 				break; 
-			case 10: 		//Gauss Seidel 
+			case 7: 		//Gauss Seidel 
+				system("cls"); 
+				printf("\n\n\tMétodo Iterativo - Gauss Seidel \n\n");
+				ColetaDadosIterativos(&ordem,matriz,b,x0,&precisao,&max_ite); 
+				convergencia = GaussSeidel(ordem,matriz,b,x0,precisao,max_ite,solucao,&iteracoes); 
+				if(convergencia){
+					MostraSolucao(solucao,ordem); 
+					printf("\nNúmero de iterações: %d\n",iteracoes); 
+				}
+				printf("\n\t");
+				system("pause"); 
 				break; 
-			case 11: //Matriz inversa				
+			case 8: //Matriz inversa	
+				system("cls"); 
+				printf("\n\n\tCálculo da matriz inversa\n\n");			
 				ColetaDados(&ordem,matriz,b,1);
 				MatrizInversa(ordem,matriz,inv_matriz);
-				MostraMatriz(inv_matriz,ordem); 
+				MostraMatriz(inv_matriz,ordem,ordem); 
+				printf("\n\t");
 				system("pause");  
 		}
-	}while(opcao != 12);
+	}while(opcao != 9);
 }

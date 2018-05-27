@@ -1,10 +1,10 @@
-/***************************************************
-		Trabalho de MNC - Sistemas Lineares
-Lucas Henrique Russo do Nascimento  	RA: 171025709
-Bruna Lika Tamake						RA: 171024427
-Leonardo Silva de Oliveira				RA: 171025903
+/************************************************************
+			Trabalho de MNC - Sistemas Lineares
+	Lucas Henrique Russo do Nascimento  	RA: 171025709
+	Bruna Lika Tamake						RA: 171024427
+	Leonardo Silva de Oliveira				RA: 171025903
 
-*****************************************************/
+*************************************************************/
 #include<math.h>
 #include<stdio.h>
 #include<conio.h>
